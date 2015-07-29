@@ -1,0 +1,81 @@
+#! /bin/sh
+#=============================================================================
+#
+#        Filename:  pinst_jtag.sh
+#
+#     Description:  
+#
+#          Author:  Gregor Boirie <gregor.boirie@parrot.com>
+#         Created:  31-Aug-2009
+#
+#             $Id: pinst_usb.sh,v 1.3 2010-04-20 10:31:24 gboirie Exp $
+#
+#            Copyright (C) 2008 Parrot S.A.
+#
+#=============================================================================
+
+usage()
+{
+    echo "pinst_usb: [-h|--help] <hardware_plateform> <software_system> <install_type>"
+    echo "run pinst_help to get more informations"
+    exit $1
+}
+
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+    usage 0
+fi
+
+if [ $# != 3 -a  $# != 1 ]; then
+    usage 1
+fi
+
+hw_plat="$1"
+soft_sys="$2"
+inst_type="$3"
+
+INSTALL_ROOT=$(dirname $0)/..
+
+if [ $(id -u) -ne 0 ]
+then
+    echo "please run as root"
+    exit 1
+fi
+
+HOME_TMPL=$HOME/.pinstrc
+
+#XXX hack for sudo
+if [ $SUDO_USER ]
+then
+    HOME_TMPL=/home/$SUDO_USER/.pinstrc
+fi
+
+if [ $PINST_TMPL ]
+then
+	HOME_TMPL="$PINST_TMPL"
+fi
+
+
+if [ $# -eq 1 ]; then
+    WORK_DIR=$(mktemp -t -d pinstrun.XXXXXX)
+    if [ $? != 0 ]; then
+	echo "Failed to create temporary working directory"
+	exit 1
+    fi
+    trap "rm -rf $WORK_DIR &" EXIT QUIT TERM INT
+
+    echo "Unpacking $1 ..."
+    files=$(tar xvf $1 -C $WORK_DIR --no-same-permissions | tr '\n' ' ')
+    set -- $files
+    if [ $# -eq 3 ]; then
+	cd $WORK_DIR
+	$INSTALL_ROOT/bin/pflasher $files
+    else
+	echo "Archive must contain 3 files"
+    fi
+else
+    $INSTALL_ROOT/bin/pflasher $HOME_TMPL/${hw_plat}_inst_usb_bootldr.bin \
+	$HOME_TMPL/${hw_plat}_${soft_sys}_${inst_type}_installer.plf \
+	$HOME_TMPL/${hw_plat}_${soft_sys}_${inst_type}_payload.plf
+fi
+
+# vim:ts=4:sw=4:expandtab
