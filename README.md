@@ -51,7 +51,7 @@ then plug it in the bebop UART connector and on the 3 pins starting at the black
 ## Phase 5
 - From a computer, connect to the Bebop's wifi network (dragonfly-mykonos3).
 - Check the computer's IP address, it should start with 192.168.42.
-- on the bebop console (adb shell), launch arducopter : "arducopter -A your_ip_address:14550 -C udp:your_ip_address:14551 -B /dev/ttyPA1 -E /dev/null -l /data/ftp/internal_000/APM/logs -t /data/ftp/internal_000/APM/terrain"
+- on the bebop console (adb shell), launch arducopter : "arducopter -A udp:your_ip_address:14550 -C udp:your_ip_address:14551 -B /dev/ttyPA1 -E /dev/null -l /data/ftp/internal_000/APM/logs -t /data/ftp/internal_000/APM/terrain"
 - Connect with the host software of your choice and fly !
 
 ## Recovery Procedure
